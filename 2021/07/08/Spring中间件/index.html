@@ -790,8 +790,8 @@
 <ul>
 <li><strong>原子性（atomicity）：一个事务必须被视为一个不可分割的最小工作单元</strong>，整个事务操作要么全部提交成功，要么全部失败回滚，对于一个事务来说，不可能只执行其中一部分操作，这就是事务的原子性。</li>
 <li><strong>一致性（consistency）：数据库总是从一个一致性的状态转换到另一个一致性的状态。</strong></li>
-<li>**隔离性（isolated）：通常来说，一个事务所做的修改在最终提交以前，对其他事务是不可见的。**这里的“通常来说”与隔离级别有关。</li>
-<li>**持久性（durability）：一旦事务提交，则其所做的修改就会永久保存到数据库中。**此时即使系统崩溃，修改的数据也不会丢失。</li>
+<li><strong>隔离性（isolated）：通常来说，一个事务所做的修改在最终提交以前，对其他事务是不可见的</strong>。这里的“通常来说”与隔离级别有关。</li>
+<li><strong>持久性（durability）：一旦事务提交，则其所做的修改就会永久保存到数据库中</strong>。此时即使系统崩溃，修改的数据也不会丢失。</li>
 </ul>
 <h3 id="隔离级别"><a href="#隔离级别" class="headerlink" title="隔离级别"></a>隔离级别</h3><p>较低的隔离级别通常可以执行更高的并发，系统的开销也更低</p>
 <p>SQL的隔离级别：</p>
@@ -835,13 +835,13 @@
 <blockquote>
 <ul>
 <li><strong>InnoDB只查找早于当前事务版本的数据行</strong>（即行的系统版本号小于或等于事务的系统版本号），这样可以确保读取的行要么在事务开始前已经存在，要么是事务自身插入或者修改过的。</li>
-<li>**行的删除版本要么未定义，要么大于当前事务版本号。**这样可以确保读取的行在事务开始之前未被删除。</li>
+<li><strong>行的删除版本要么未定义，要么大于当前事务版本号</strong>。这样可以确保读取的行在事务开始之前未被删除。</li>
 </ul>
 <p>只有符合上述两个条件的记录，才能作为查询结果。</p>
 </blockquote>
 <p><strong>INSERT</strong>：InnoDB为新插入的每一行保存当前系统版本号作为行版本号。</p>
 <p><strong>DELETE</strong>：InnoDB为删除的每一行保存当前系统版本号作为行删除标识。</p>
-<p>**UPDATE：InnoDB为插入一行新记录，**保存当前系统版本号作为行版本号，<strong>同时保存当前系统版本号到原来的行作为行删除标识。</strong></p>
+<p><strong>UPDATE：InnoDB为插入一行新记录</strong>，保存当前系统版本号作为行版本号，<strong>同时保存当前系统版本号到原来的行作为行删除标识。</strong></p>
 <p><strong>保存这两个额外系统版本号，优点就是使大多数读操作都可以不用加锁，读数据操作很简单，性能很好，并且也能保证只会读取到符合标准的行。缺点就是每行记录都需要额外的存储空间，需要做更多的行检查工作，以及一些额外的维护工作。</strong></p>
 <p><strong>MVCC只在 REPEATABLE READ（可重复读）和READ COMMITTED（提交读）两个隔离级别下工作</strong>，因为READ UNCOMMITTED总是读取最新的数据行，而SERIALIZABLE则会对所有读取的行加锁。</p>
 <h2 id="MySQL的存储引擎"><a href="#MySQL的存储引擎" class="headerlink" title="MySQL的存储引擎"></a>MySQL的存储引擎</h2><p>可以使用<code>SHOW TABLE STATUS</code> 命令显示表的相关信息。例如：</p>
@@ -849,7 +849,7 @@
 
 <h2 id="InnoDB存储引擎"><a href="#InnoDB存储引擎" class="headerlink" title="InnoDB存储引擎"></a>InnoDB存储引擎</h2><p>InnoDB是MySQL的默认事务型引擎，也是最重要、使用最广泛的存储引擎。它被设计用来处理大量的短期事务，短期事务大部分情况是正常提交的，很少会回滚。InnoDB的性能和自动崩溃恢复特性，使得它在非事务型存储的需求中也很流行。</p>
 <p>InnoDB的数据存储在表空间中，表空间是由InnoDB管理的一个黑盒子，有一系列的数据文件组成，InnoDB可以将每个表的数据和索引存放在单独的文件中。</p>
-<p>InnoDB采用MVCC来支持高并发，并且实现了四个标准的隔离级别，默认为REPATABLE READ，并且通过**间隙锁（next-key locking） **策略防止幻读的出现。间隙锁使得InnoDB不仅仅锁定查询涉及的行，还会对索引中的间隙进行锁定，以防止幻影行的插入。</p>
+<p>InnoDB采用MVCC来支持高并发，并且实现了四个标准的隔离级别，默认为REPATABLE READ，并且通过**间隙锁(next-key locking)**策略防止幻读的出现。间隙锁使得InnoDB不仅仅锁定查询涉及的行，还会对索引中的间隙进行锁定，以防止幻影行的插入。</p>
 <p>InnoDB表是基于聚簇索引建立的，聚簇索引对主键查询有很高的性能，不过它的二级索引中必须包含主键列，所以如果主键列很大的话，其他的所有索引都会很大。因此若表上的索引较多的话，主键应当尽可能的小。InnoDB是平台独立的，可以将数据和索引文件在平台之间拷贝。</p>
 <p>InnoDB内部做了很多优化，包括从磁盘读取数据时采用的可预测性预读，能够自动在内存中创建hash索引以及加速读操作的自适应哈希索引，以及能够加速插入操作的插入缓冲区等。</p>
 <h2 id="MyISAM存储引擎"><a href="#MyISAM存储引擎" class="headerlink" title="MyISAM存储引擎"></a>MyISAM存储引擎</h2><p>MyISAM是MySQL5.1之前的默认存储引擎。MyISAM提供了大量的特性，包括全文索引、压缩、空间函数等，但MyISAM不支持事务和行级锁，而且有一个<strong>最大的缺陷就是崩溃后无法安全恢复。</strong></p>
@@ -930,7 +930,7 @@
 <h3 id="元数据方式-略"><a href="#元数据方式-略" class="headerlink" title="元数据方式 略"></a>元数据方式 略</h3><h2 id="IoC容器之BeanFactory"><a href="#IoC容器之BeanFactory" class="headerlink" title="IoC容器之BeanFactory"></a>IoC容器之BeanFactory</h2><p>Spring提供了两种容器类型：<strong>BeanFactory</strong>和<strong>ApplicationContext</strong>。</p>
 <ul>
 <li><strong>BeanFactory</strong>：基础类型的Ioc容器，提供完整的IoC服务支持。<strong>如果没有特殊指定，默认采用延迟初始化策略。即只有当客户端对象需要访问容器中的某个受管对象时，才对该受管对象进行初始化以及依赖注入操作</strong>。所以相对来说，该容器启动初期速度较快，所需要的资源有限，因此BeanFactroy比较适合用于资源有限，并且功能要求不是很严格的场景。</li>
-<li><strong>ApplicationContext</strong>：<strong>ApplicationContext是在BeanFactory的基础上构建的</strong>，是相对于高级的容器实现，因此ApplicationContext还提供了一些例如事件发布、国际化信息支持的高级特性**。ApplicationContext所管理的对象，在该容器启动之后，默认全部初始化并绑定完成**。所以相对BeanFactory来说，ApplicationContext要求更多的系统资源，同时启动时间也会长一些。因此ApplicationContext更适合于资源充足并且要求更多功能的场景中。</li>
+<li><strong>ApplicationContext</strong>：<strong>ApplicationContext是在BeanFactory的基础上构建的</strong>，是相对于高级的容器实现，因此ApplicationContext还提供了一些例如事件发布、国际化信息支持的高级特性。ApplicationContext所管理的对象，在该容器启动之后，默认全部初始化并绑定完成。所以相对BeanFactory来说，ApplicationContext要求更多的系统资源，同时启动时间也会长一些。因此ApplicationContext更适合于资源充足并且要求更多功能的场景中。</li>
 </ul>
 <p>通过下图可以对BeanFactory和ApplicationContext之间的关系有一个更清晰的认知。</p>
 <p><img src="/typora-user-images/image-20210119174606328.png" alt="image-20210119174606328"></p>
@@ -1123,7 +1123,7 @@
 <p><strong>换句话说，第一个实例注入后，MockNewsPersister再也没有重新向容器申请新的实例，所以容器也不会重新为其注入新的FXNewsBean类型的实例</strong>。</p>
 <p>下面就是介绍解决这个问题的方法了。</p>
 <h3 id="方法注入"><a href="#方法注入" class="headerlink" title="方法注入"></a>方法注入</h3><p>Spring容器提出了一种叫做方法注入（Method Injection）的方式，可以帮助我们解决上述问题。我们所要做的很简单，只要让getNewsBean方法声明符合规定的格式，并在配置文件中通知容器，当该方法被调用的时候，每次返回指定类型的对象实例即可。</p>
-<p>**若要使用方法注入的方式，该方法必须能够被子类实现或者覆写，因为容器会为我们要进行方法注入的对象使用Cglib动态生成一个子类实现，从而代替当前对象，**既然我们的getNewsBean()方法已经满足以上方法声明要求，就只需要正确配置该类了：</p>
+<p><strong>若要使用方法注入的方式，该方法必须能够被子类实现或者覆写，因为容器会为我们要进行方法注入的对象使用Cglib动态生成一个子类实现，从而代替当前对象</strong>，既然我们的getNewsBean()方法已经满足以上方法声明要求，就只需要正确配置该类了：</p>
 <figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">bean</span> <span class="attr">id</span>=<span class="string">&quot;newsBean&quot;</span> <span class="attr">class</span>=<span class="string">&quot;..domain.FXNewsBean&quot;</span> <span class="attr">singleton</span>=<span class="string">&quot;false&quot;</span>&gt;</span> </span><br><span class="line"><span class="tag">&lt;/<span class="name">bean</span>&gt;</span> </span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">bean</span> <span class="attr">id</span>=<span class="string">&quot;mockPersister&quot;</span> <span class="attr">class</span>=<span class="string">&quot;..impl.MockNewsPersister&quot;</span>&gt;</span>  </span><br><span class="line">	<span class="tag">&lt;<span class="name">lookup-method</span> <span class="attr">name</span>=<span class="string">&quot;getNewsBean&quot;</span> <span class="attr">bean</span>=<span class="string">&quot;newsBean&quot;</span>/&gt;</span> </span><br><span class="line"><span class="tag">&lt;/<span class="name">bean</span>&gt;</span></span><br></pre></td></tr></table></figure>
 
 <p><strong>通过<lookup-method>的name属性指定需要注入的方法名，bean属性指定需要注入的对象，当getNewsBean方法被调用的时候，容器可以每次返回一个新的FXNewsBean类型的实例。所以这个时候再次检查执行结果，输出的实例引用就是不同的了</lookup-method></strong>。</p>
@@ -1157,11 +1157,11 @@
 <h3 id="两大阶段"><a href="#两大阶段" class="headerlink" title="两大阶段"></a>两大阶段</h3><p>IoC容器所起的作用就如上图所展示的那样，<strong>他会以某种方式加载Configuration Metadata（通常为XML配置文件），然后根据这些信息绑定整个系统对象，最终组装成一个可用的基于轻量级容器的应用系统</strong>。</p>
 <p>Spring的IoC容器实现以上功能的过程，基本上分为两个阶段：<strong>容器启动阶段</strong>和<strong>Bean的实例化阶段</strong>。</p>
 <p><img src="/typora-user-images/image-20210204173534555.png" alt="image-20210204173534555"></p>
-<h3 id="容器启动阶段"><a href="#容器启动阶段" class="headerlink" title="容器启动阶段"></a>容器启动阶段</h3><p>**容器启动伊始，首先会通过某种途径加载Configuration MetaData。除了代码方式比较直接，大部分情况下都会依赖于工具类BeanDefinitionReader对加载的配置文件进行解析和分析，并将分析后的信息编组为相应的BeanDefinition，最后把这些保存了bean定义必要信息的BeanDefinition，注册到相应的BeanDefinitionRegistry，**这样启动阶段就完成了。</p>
+<h3 id="容器启动阶段"><a href="#容器启动阶段" class="headerlink" title="容器启动阶段"></a>容器启动阶段</h3><p><strong>容器启动伊始，首先会通过某种途径加载Configuration MetaData。除了代码方式比较直接，大部分情况下都会依赖于工具类BeanDefinitionReader对加载的配置文件进行解析和分析，并将分析后的信息编组为相应的BeanDefinition，最后把这些保存了bean定义必要信息的BeanDefinition，注册到相应的BeanDefinitionRegistry</strong>，这样启动阶段就完成了。</p>
 <p><img src="/typora-user-images/image-20210204173747427.png" alt="image-20210204173747427"></p>
 <h3 id="Bean实例化阶段"><a href="#Bean实例化阶段" class="headerlink" title="Bean实例化阶段"></a>Bean实例化阶段</h3><p>经过第一阶段，现在所有的bean定义信息都通过BeanDefinition的方式注册到了BeanDefinitionRegistry中。当某个请求方通过容器的getBean方法明确地请求某个对象，或者因依赖关系容器需要隐式地调用getBean方法时，就会触发第二阶段的活动。</p>
 <p>该阶段，容器会首先检查所请求的对象之前是否已经初始化。如果没有，则会根据注册的BeanDefinition所提供的信息实例化被请求对象，并为其注入依赖。如果该对象实现了某些回调接口，也会根据回调接口的要求来装配它。当该对象装配完毕之后，容器会立即将其返回请求方使用。如果说第一阶段只是根据图纸装配生产线的话，那么第二阶段就是使用装配好的生产线来生产具体的产品了。</p>
-<h2 id="插手两大阶段"><a href="#插手两大阶段" class="headerlink" title="插手两大阶段"></a>插手两大阶段</h2><p>**Spring提供了一种叫做BeanFactoryPostProcessor的容器扩展机制，该机制允许我们在容器实例化相应对象之前，对注册到容器的BeanDefinition所保存的信息做相应的修改。这就相当于在容器第一阶段结束之后，第二阶段开始之前，加入一道工序，让我们对最终的BeanDefinition做一些额外的操作，**比如修改其中bean定义的某些属性，为bean定义增加其他信息等。</p>
+<h2 id="插手两大阶段"><a href="#插手两大阶段" class="headerlink" title="插手两大阶段"></a>插手两大阶段</h2><p><strong>Spring提供了一种叫做BeanFactoryPostProcessor的容器扩展机制，该机制允许我们在容器实例化相应对象之前，对注册到容器的BeanDefinition所保存的信息做相应的修改。这就相当于在容器第一阶段结束之后，第二阶段开始之前，加入一道工序，让我们对最终的BeanDefinition做一些额外的操作</strong>，比如修改其中bean定义的某些属性，为bean定义增加其他信息等。</p>
 <p>如果自定义实现BeanFactoryPostProcessor，通常实现接口BeanFactoryPostProcessor就可以了，如果有多个自定义实现的类，则实现Ordered接口来规定它们的顺序。</p>
 <p>但是Spring为我们提供了三种常用的已经实现好的BeanFactoryPostProcessor实现类，它们分别是 PropertyPlaceholderConfigurer、PropertyOverrideConfigurer和CustomEditorConfigure。在介绍这三种实现类之前，先需要了解它们的配置方法是什么。</p>
 <p>手动装配BeanFactory使用的BeanFactoryPostProcessor</p>
@@ -1204,7 +1204,7 @@
 <h4 id="第二步"><a href="#第二步" class="headerlink" title="第二步"></a>第二步</h4><p><strong>第一步结束后返回BeanWrapper实例而不是原先的对象实例，就是为了第二步“设置对象属性”</strong>。使用BeanWrapper对bean实例操作很方便，可以免去直接使用Java反射API操作对象实力的反锁，看一段代码就知道Spring容器内部时如何设置对象属性的了：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Object</span> <span class="variable">provider</span> <span class="operator">=</span> Class.forName(<span class="string">&quot;package.name.FXNewsProvider&quot;</span>).newInstance(); </span><br><span class="line"><span class="type">Object</span> <span class="variable">listener</span> <span class="operator">=</span> Class.forName(<span class="string">&quot;package.name.DowJonesNewsListener&quot;</span>).newInstance(); </span><br><span class="line"><span class="type">Object</span> <span class="variable">persister</span> <span class="operator">=</span> Class.forName(<span class="string">&quot;package.name.DowJonesNewsPersister&quot;</span>).newInstance();  </span><br><span class="line"></span><br><span class="line"><span class="type">BeanWrapper</span> <span class="variable">newsProvider</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">BeanWrapperImpl</span>(provider); </span><br><span class="line">newsProvider.setPropertyValue(<span class="string">&quot;newsListener&quot;</span>, listener); </span><br><span class="line">newsProvider.setPropertyValue(<span class="string">&quot;newPersistener&quot;</span>, persister);</span><br></pre></td></tr></table></figure>
 
-<h3 id="各色的Aware接口"><a href="#各色的Aware接口" class="headerlink" title="各色的Aware接口"></a>各色的Aware接口</h3><p>**当对象实例化完成后并且相关属性以及依赖设置完成之后，Spring容器会检查当前对象实例是否实现了一系列的以Aware命名结尾的接口定义，如果是，则将这些Aware接口定义中规定的依赖注入给当前对象实例。**下面介绍几个重要的Aware接口：</p>
+<h3 id="各色的Aware接口"><a href="#各色的Aware接口" class="headerlink" title="各色的Aware接口"></a>各色的Aware接口</h3><p><strong>当对象实例化完成后并且相关属性以及依赖设置完成之后，Spring容器会检查当前对象实例是否实现了一系列的以Aware命名结尾的接口定义，如果是，则将这些Aware接口定义中规定的依赖注入给当前对象实例</strong>。下面介绍几个重要的Aware接口：</p>
 <ul>
 <li><strong>ApplicationContextAware</strong>: 获得ApplicationContext对象,可以用来获取所有Bean definition的名字。</li>
 <li><strong>BeanFactoryAware</strong>:获得BeanFactory对象，可以用来检测Bean的作用域。</li>
@@ -1216,12 +1216,12 @@
 <h3 id="BeanPostProcessor"><a href="#BeanPostProcessor" class="headerlink" title="BeanPostProcessor"></a>BeanPostProcessor</h3><p>BeanPostProcessor会处理容器内所有符合条件的实例化后的对象实例，该接口声明了两个方法，分别在不同的时机执行：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">BeanPostProcessor</span>  &#123;  </span><br><span class="line">	Object <span class="title function_">postProcessBeforeInitialization</span><span class="params">(Object bean, String beanName)</span> <span class="keyword">throws</span> BeansException; </span><br><span class="line">	Object <span class="title function_">postProcessAfterInitialization</span><span class="params">(Object bean, String beanName)</span> <span class="keyword">throws</span> BeansException; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<p>**postProcessBeforeInitialization()方法是上图中BeanPostProcessor前置处理这一步将会执行的方法，postProcessAfterInitialization()则是对应图中BeanPostProcessor后置处理那一步将会执行的方法。**BeanPostProcessor的两个方法中都传入了原来的对象实例的引用，这为我们操作扩展容器的对象实例化过程中的行为提供了极大的便利。</p>
+<p><strong>postProcessBeforeInitialization()方法是上图中BeanPostProcessor前置处理这一步将会执行的方法，postProcessAfterInitialization()则是对应图中BeanPostProcessor后置处理那一步将会执行的方法</strong>。BeanPostProcessor的两个方法中都传入了原来的对象实例的引用，这为我们操作扩展容器的对象实例化过程中的行为提供了极大的便利。</p>
 <h3 id="InitializingBean和init-method"><a href="#InitializingBean和init-method" class="headerlink" title="InitializingBean和init-method"></a>InitializingBean和init-method</h3><p>InitializingBean是容器内部广泛使用的一个对象生命周期表示接口，其定义如下：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">InitializingBean</span> &#123;   </span><br><span class="line">	<span class="keyword">void</span> <span class="title function_">afterPropertiesSet</span><span class="params">()</span> <span class="keyword">throws</span> Exception; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p><strong>其作用在于，在对象实例化过程调用过“BeanPostProcessor”的前置处理之后，会接着检测当前对象是否实现了InitializingBean接口，如果是，则回到调用其afterPropertiesSet()方法进一步调整对象实例的状态。</strong></p>
-<p>**通过init-method，系统中业务对象的自定义初始化操作可以以任何方式命名。而不再受制于InitializingBean的afterPropertiesSet()。**在自己定义init方法后，只需要在XML文件中简单配置一下就好了：</p>
+<p><strong>通过init-method，系统中业务对象的自定义初始化操作可以以任何方式命名。而不再受制于InitializingBean的afterPropertiesSet()</strong>。在自己定义init方法后，只需要在XML文件中简单配置一下就好了：</p>
 <figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">beans</span>&gt;</span>  </span><br><span class="line">	<span class="tag">&lt;<span class="name">bean</span> <span class="attr">id</span>=<span class="string">&quot;tradeDateCalculator&quot;</span> <span class="attr">class</span>=<span class="string">&quot;FXTradeDateCalculator&quot;</span> <span class="attr">init-method</span>=<span class="string">&quot;setupHolidays&quot;</span> &gt;</span> </span><br><span class="line">		<span class="tag">&lt;<span class="name">constructor-arg</span>&gt;</span>    </span><br><span class="line">			<span class="tag">&lt;<span class="name">ref</span> <span class="attr">bean</span>=<span class="string">&quot;sqlMapClientTemplate&quot;</span>/&gt;</span>   </span><br><span class="line">		<span class="tag">&lt;/<span class="name">constructor-arg</span>&gt;</span>  </span><br><span class="line">	<span class="tag">&lt;/<span class="name">bean</span>&gt;</span> </span><br><span class="line">	<span class="tag">&lt;<span class="name">bean</span> <span class="attr">id</span>=<span class="string">&quot;sqlMapClientTemplate&quot;</span> <span class="attr">class</span>=<span class="string">&quot;org.springframework.orm.ibatis.SqlMapClientTemplate&quot;</span>&gt;</span>   </span><br><span class="line">		...  </span><br><span class="line">	<span class="tag">&lt;/<span class="name">bean</span>&gt;</span>    </span><br><span class="line">	... </span><br><span class="line">&lt; /beans&gt;</span><br></pre></td></tr></table></figure>
 
 <p>这样FXTradeDateCalculator类中的setupHolidays方法就是会在该阶段执行的方法了。</p>
