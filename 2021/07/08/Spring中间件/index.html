@@ -362,10 +362,8 @@
 <p>在上面的代码中我们定义了只有拥有角色ROLE_ADMIN的用户才能访问adduser()方法，而访问find()方法需要有ROLE_USER角色或ROLE_ADMIN角色。使用表达式时我们还可以在表达式中使用方法参数。</p>
 <p><strong>public class</strong> UserServiceImpl <strong>implements</strong> UserService {</p>
 <p>&#x2F;**</p>
-<ul>
-<li>限制只能查询Id小于10的用户</li>
-</ul>
-<p> *&#x2F;</p>
+<p>* 限制只能查询Id小于10的用户</p>
+<p>*&#x2F;</p>
 <p> @PreAuthorize(“#id&lt;10”)</p>
 <p><strong>public</strong> User find(<strong>int</strong> id) {</p>
 <p>System.<em>out</em>.println(“find user by id………” + id);</p>
@@ -849,7 +847,7 @@
 
 <h2 id="InnoDB存储引擎"><a href="#InnoDB存储引擎" class="headerlink" title="InnoDB存储引擎"></a>InnoDB存储引擎</h2><p>InnoDB是MySQL的默认事务型引擎，也是最重要、使用最广泛的存储引擎。它被设计用来处理大量的短期事务，短期事务大部分情况是正常提交的，很少会回滚。InnoDB的性能和自动崩溃恢复特性，使得它在非事务型存储的需求中也很流行。</p>
 <p>InnoDB的数据存储在表空间中，表空间是由InnoDB管理的一个黑盒子，有一系列的数据文件组成，InnoDB可以将每个表的数据和索引存放在单独的文件中。</p>
-<p>InnoDB采用MVCC来支持高并发，并且实现了四个标准的隔离级别，默认为REPATABLE READ，并且通过**间隙锁(next-key locking)**策略防止幻读的出现。间隙锁使得InnoDB不仅仅锁定查询涉及的行，还会对索引中的间隙进行锁定，以防止幻影行的插入。</p>
+<p>InnoDB采用MVCC来支持高并发，并且实现了四个标准的隔离级别，默认为REPATABLE READ，并且通过<strong>间隙锁 next-key locking</strong>策略防止幻读的出现。间隙锁使得InnoDB不仅仅锁定查询涉及的行，还会对索引中的间隙进行锁定，以防止幻影行的插入。</p>
 <p>InnoDB表是基于聚簇索引建立的，聚簇索引对主键查询有很高的性能，不过它的二级索引中必须包含主键列，所以如果主键列很大的话，其他的所有索引都会很大。因此若表上的索引较多的话，主键应当尽可能的小。InnoDB是平台独立的，可以将数据和索引文件在平台之间拷贝。</p>
 <p>InnoDB内部做了很多优化，包括从磁盘读取数据时采用的可预测性预读，能够自动在内存中创建hash索引以及加速读操作的自适应哈希索引，以及能够加速插入操作的插入缓冲区等。</p>
 <h2 id="MyISAM存储引擎"><a href="#MyISAM存储引擎" class="headerlink" title="MyISAM存储引擎"></a>MyISAM存储引擎</h2><p>MyISAM是MySQL5.1之前的默认存储引擎。MyISAM提供了大量的特性，包括全文索引、压缩、空间函数等，但MyISAM不支持事务和行级锁，而且有一个<strong>最大的缺陷就是崩溃后无法安全恢复。</strong></p>
